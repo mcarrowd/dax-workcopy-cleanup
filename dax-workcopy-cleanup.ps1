@@ -188,7 +188,11 @@ Function svnDiff($targetdir)
 {
 	Write-Verbose "svnDiff $targetdir"
 	$result = runTool $svn "diff --no-diff-added --no-diff-deleted --ignore-properties --diff-cmd ""$diffCmdPath"" ""$targetdir"""
-	if ($result.ExitCode -eq 0)
+	if ($result.ExitCode -ne 0)
+	{
+		write-warning "SVN DIFF return non-zero exit code ($($result.exitcode))"
+	}
+	if ($result.StandardOutputContent)
 	{
 		$diffOutput = $result.StandardOutputContent.split("`n")
 		if ($diffOutput)
@@ -197,10 +201,6 @@ Function svnDiff($targetdir)
 			$diffOutput = "File1?File2", $diffOutput
 			return $diffOutput | ConvertFrom-Csv -Delimiter ?
 		}
-	}
-	else
-	{
-		write-error "SVN DIFF return non-zero exit code ($($result.exitcode))"
 	}
 }
 
