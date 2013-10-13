@@ -1,7 +1,11 @@
 ﻿[CmdletBinding()]
 Param(
 	[Parameter(Mandatory=$True,Position=1)]
-	[string]$WorkDir
+	[string]$WorkDir,
+	[switch]$SkipCase,
+	[switch]$SkipForms,
+	[switch]$SkipProjects,
+	[switch]$SkipFormsControls
 )
 
 $DiffUtilsRegKey = 'HKLM:\SOFTWARE\GnuWin32\DiffUtils'
@@ -338,12 +342,24 @@ Function revertFormsControls()
 Write-Progress -Activity "Cleanup unnecessary changes" -status "init" -percentComplete 0
 if ((checkEncodings -eq $TRUE) -and (checkOrCreateDiffCmd -eq $TRUE) -and (initTools -eq $TRUE))
 {
-	Write-Progress -Activity "Cleanup unnecessary changes" -status "revertFormsControls" -percentComplete 25
-	revertFormsControls
-	Write-Progress -Activity "Cleanup unnecessary changes" -status "revertCase" -percentComplete 50
-	revertCase
-	Write-Progress -Activity "Cleanup unnecessary changes" -status "revertForms" -percentComplete 75
-	revertForms
-	Write-Progress -Activity "Cleanup unnecessary changes" -status "revertProjects" -percentComplete 100
-	revertProjects
+	if ($SkipFormsControls -eq $FALSE)
+	{
+		Write-Progress -Activity "Cleanup unnecessary changes" -status "revertFormsControls" -percentComplete 25
+		revertFormsControls
+	}
+	if ($SkipCase -eq $FALSE)
+	{
+		Write-Progress -Activity "Cleanup unnecessary changes" -status "revertCase" -percentComplete 50
+		revertCase
+	}
+	if ($SkipForms -eq $FALSE)
+	{
+		Write-Progress -Activity "Cleanup unnecessary changes" -status "revertForms" -percentComplete 75
+		revertForms
+	}
+	if ($SkipProjects -eq $FALSE)
+	{
+		Write-Progress -Activity "Cleanup unnecessary changes" -status "revertProjects" -percentComplete 100
+		revertProjects
+	}
 }
