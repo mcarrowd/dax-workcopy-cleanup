@@ -5,7 +5,8 @@ Param(
 	[switch]$SkipCase,
 	[switch]$SkipForms,
 	[switch]$SkipProjects,
-	[switch]$SkipFormsControls
+	[switch]$SkipFormsControls,
+	[switch]$AskUserConfirm
 )
 
 $DiffUtilsRegKey = 'HKLM:\SOFTWARE\GnuWin32\DiffUtils'
@@ -34,6 +35,24 @@ function ConvertTo-Encoding ([string]$From, [string]$To)
 		$bytes = [System.Text.Encoding]::Convert($encFrom, $encTo, $bytes)
 		$encTo.GetString($bytes)
 	}
+}
+
+function userConfirm()
+{
+	if ($AskUserConfirm)
+	{
+		$title = 'Cleanup unnecessary changes'
+		$message = 'Perform cleanup of unnecessary changes?'
+		$yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes", 'Run cleanup.'
+		$no = New-Object System.Management.Automation.Host.ChoiceDescription "&No", 'Exit.'
+		$options = [System.Management.Automation.Host.ChoiceDescription[]]($yes, $no)
+		if ($host.ui.PromptForChoice($title, $message, $options, 0) -ne 0)
+		{
+			write-verbose "Operation cancelled by user"
+			return $FALSE
+		}
+	}
+	return $TRUE
 }
 
 function checkEncodings()
@@ -340,7 +359,7 @@ Function revertFormsControls()
 }
 
 Write-Progress -Activity "Cleanup unnecessary changes" -status "init" -percentComplete 0
-if ((checkEncodings -eq $TRUE) -and (checkOrCreateDiffCmd -eq $TRUE) -and (initTools -eq $TRUE))
+if ((userConfirm -eq $TRURE) -and (checkEncodings -eq $TRUE) -and (checkOrCreateDiffCmd -eq $TRUE) -and (initTools -eq $TRUE))
 {
 	if ($SkipFormsControls -eq $FALSE)
 	{
